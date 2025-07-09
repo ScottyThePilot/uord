@@ -16,7 +16,7 @@
 //! A library providing implementations of unordered pairs (or more generally, unordered sets).
 //!
 //! This is useful when, for example, you want to create a HashMap that associates data with pairs of things:
-//! ```
+//! ```rust
 //! #use uord::UOrd2;
 //! #use std::collections::HashMap;
 //! let mut map: HashMap<UOrd2<u16>, String> = HashMap::new();
@@ -28,15 +28,17 @@
 //! When creating a [`UOrd`], the ordering of the items on creation does not matter,
 //! and [`UOrd`]s created with different initial element orders will be equal to one another.
 
+#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
 #[cfg(feature = "serde")]
 extern crate serde;
 
+#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
 mod iter;
 pub mod proxy;
-mod transmogrify;
+mod transmute;
 
 pub use crate::iter::*;
 use crate::proxy::{Proxy, ProxyWrapper};
@@ -46,6 +48,7 @@ use core::cmp::Ordering;
 use core::fmt;
 use core::hash::{Hash, Hasher};
 
+#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 #[cfg(feature = "alloc")]
 use alloc::vec::Vec;
 
@@ -111,6 +114,7 @@ impl<T, const N: usize> UOrd<T, N> where T: Ord {
   /// The provided function takes a `T` and must return a value of type `Option<U>`.
   ///
   /// This function is temporary, and will be deprecated when `try_trait_v2` is stabilized.
+  #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
   #[cfg(feature = "alloc")]
   pub fn try_map_opt<U>(self, f: impl FnMut(T) -> Option<U>) -> Option<UOrd<U, N>> where U: Ord {
     self.into_array().into_iter().map(f).collect::<Option<Vec<U>>>()
@@ -122,6 +126,7 @@ impl<T, const N: usize> UOrd<T, N> where T: Ord {
   /// The provided function takes a `T` and must return a value of type `Return<U, E>`.
   ///
   /// This function is temporary, and will be deprecated when `try_trait_v2` is stabilized.
+  #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
   #[cfg(feature = "alloc")]
   pub fn try_map_res<U, E>(self, f: impl FnMut(T) -> Result<U, E>) -> Result<UOrd<U, N>, E> where U: Ord {
     self.into_array().into_iter().map(f).collect::<Result<Vec<U>, E>>()
@@ -138,6 +143,7 @@ impl<T, const N: usize> UOrd<T, N> where T: Ord {
 
   /// Fallibly converts each element of this [`UOrd`] into a given type `U`
   /// based on `T`'s `TryInto<U>` implementation, alternatively returning error.
+  #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
   #[cfg(feature = "alloc")]
   pub fn try_convert<U>(self) -> Result<UOrd<U, N>, T::Error>
   where T: TryInto<U>, U: Ord {
@@ -202,7 +208,7 @@ impl<T, const N: usize> UOrd<T, N> {
 
   /// Converts this [`UOrd`] into its array of elements, which is sorted.
   pub const fn into_array(self) -> [T; N] {
-    unsafe { crate::transmogrify::transmogrify::<Self, [T; N]>(self) }
+    unsafe { crate::transmute::transmute::<Self, [T; N]>(self) }
   }
 
   /// Creates an iterator over references to each element of this [`UOrd`].
@@ -290,6 +296,7 @@ impl<T, const N: usize, P> UOrdProxied<T, N, P> where P: Proxy<T> {
   /// This function also allows a proxy, `R`, for the new [`UOrdProxied`] to be specified.
   ///
   /// This function is temporary, and will be deprecated when `try_trait_v2` is stabilized.
+  #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
   #[cfg(feature = "alloc")]
   pub fn try_map_proxied_opt<U, R>(self, mut f: impl FnMut(T) -> Option<U>) -> Option<UOrdProxied<U, N, R>> where R: Proxy<U> {
     self.try_map_opt(|value| f(ProxyWrapper::into_inner(value)).map(ProxyWrapper::new))
@@ -300,6 +307,7 @@ impl<T, const N: usize, P> UOrdProxied<T, N, P> where P: Proxy<T> {
   /// This function also allows a proxy, `R`, for the new [`UOrdProxied`] to be specified.
   ///
   /// This function is temporary, and will be deprecated when `try_trait_v2` is stabilized.
+  #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
   #[cfg(feature = "alloc")]
   pub fn try_map_proxied_res<U, R, E>(self, mut f: impl FnMut(T) -> Result<U, E>) -> Result<UOrdProxied<U, N, R>, E> where R: Proxy<U> {
     self.try_map_res(|value| f(ProxyWrapper::into_inner(value)).map(ProxyWrapper::new))
@@ -314,6 +322,7 @@ impl<T, const N: usize, P> UOrdProxied<T, N, P> where P: Proxy<T> {
 
   /// Fallibly converts each element of this [`UOrdProxied`] into a given type `U`
   /// based on `T`'s `TryInto<U>` implementation, alternatively returning error.
+  #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
   #[cfg(feature = "alloc")]
   pub fn try_convert_proxied<U, R>(self) -> Result<UOrdProxied<U, N, R>, T::Error>
   where T: TryInto<U>, R: Proxy<U> {
@@ -532,6 +541,7 @@ impl<T, const N: usize> IntoIterator for UOrd<T, N> {
   }
 }
 
+#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
 #[cfg(feature = "serde")]
 impl<T, const N: usize> serde::Serialize for UOrd<T, N>
 where T: serde::Serialize {
@@ -541,6 +551,7 @@ where T: serde::Serialize {
   }
 }
 
+#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
 #[cfg(feature = "serde")]
 impl<'de, T, const N: usize> serde::Deserialize<'de> for UOrd<T, N>
 where T: serde::Deserialize<'de> + Ord {

@@ -81,69 +81,69 @@ impl<T, P: Proxy<T> + ?Sized> ProxyWrapper<T, P> {
 
   /// Convert this [`ProxyWrapper`] into its inner type.
   pub const fn into_inner(self) -> T {
-    unsafe { crate::transmogrify::transmogrify::<ProxyWrapper<T, P>, T>(self) }
+    unsafe { crate::transmute::transmute::<ProxyWrapper<T, P>, T>(self) }
   }
 
   /// Convert a slice of `T` into a slice of [`ProxyWrapper`].
   pub const fn wrap_slice(s: &[T]) -> &[Self] {
-    unsafe { crate::transmogrify::transmogrify_slice::<T, Self>(s) }
+    unsafe { crate::transmute::transmute_slice::<T, Self>(s) }
   }
 
   /// Convert a mutable slice of `T` into a mutable slice of [`ProxyWrapper`].
   pub const fn wrap_slice_mut(s: &mut [T]) -> &mut [Self] {
-    unsafe { crate::transmogrify::transmogrify_slice_mut::<T, Self>(s) }
+    unsafe { crate::transmute::transmute_slice_mut::<T, Self>(s) }
   }
 
   /// Convert an array of `T` into an array of [`ProxyWrapper`].
   pub const fn wrap_array<const N: usize>(s: [T; N]) -> [Self; N] {
-    unsafe { crate::transmogrify::transmogrify::<[T; N], [Self; N]>(s) }
+    unsafe { crate::transmute::transmute::<[T; N], [Self; N]>(s) }
   }
 
   /// Convert a reference to an array of `T` into a reference to an array of [`ProxyWrapper`].
   pub const fn wrap_array_ref<const N: usize>(s: &[T; N]) -> &[Self; N] {
-    unsafe { crate::transmogrify::transmogrify_ref::<[T; N], [Self; N]>(s) }
+    unsafe { crate::transmute::transmute_ref::<[T; N], [Self; N]>(s) }
   }
 
   /// Convert a mutable reference to an array of `T` into a mutable reference to an array of [`ProxyWrapper`].
   pub const fn wrap_array_ref_mut<const N: usize>(s: &mut [T; N]) -> &mut [Self; N] {
-    unsafe { crate::transmogrify::transmogrify_ref_mut::<[T; N], [Self; N]>(s) }
+    unsafe { crate::transmute::transmute_ref_mut::<[T; N], [Self; N]>(s) }
   }
 
   /// Convert a slice of [`ProxyWrapper`] into a slice of `T`.
   pub const fn peel_slice(s: &[Self]) -> &[T] {
-    unsafe { crate::transmogrify::transmogrify_slice::<Self, T>(s) }
+    unsafe { crate::transmute::transmute_slice::<Self, T>(s) }
   }
 
   /// Convert a mutable slice of [`ProxyWrapper`] into a mutable slice of `T`.
   pub const fn peel_slice_mut(s: &mut [Self]) -> &mut [T] {
-    unsafe { crate::transmogrify::transmogrify_slice_mut::<Self, T>(s) }
+    unsafe { crate::transmute::transmute_slice_mut::<Self, T>(s) }
   }
 
   /// Convert an array of [`ProxyWrapper`] into an array of `T`.
   pub const fn peel_array<const N: usize>(s: [Self; N]) -> [T; N] {
-    unsafe { crate::transmogrify::transmogrify::<[Self; N], [T; N]>(s) }
+    unsafe { crate::transmute::transmute::<[Self; N], [T; N]>(s) }
   }
 
   /// Convert a reference to an array of [`ProxyWrapper`] into a reference to an array of `T`.
   pub const fn peel_array_ref<const N: usize>(s: &[Self; N]) -> &[T; N] {
-    unsafe { crate::transmogrify::transmogrify_ref::<[Self; N], [T; N]>(s) }
+    unsafe { crate::transmute::transmute_ref::<[Self; N], [T; N]>(s) }
   }
 
   /// Convert a mutable reference to an array of [`ProxyWrapper`] into a mutable reference to an array of `T`.
   pub const fn peel_array_ref_mut<const N: usize>(s: &mut [Self; N]) -> &mut [T; N] {
-    unsafe { crate::transmogrify::transmogrify_ref_mut::<[Self; N], [T; N]>(s) }
+    unsafe { crate::transmute::transmute_ref_mut::<[Self; N], [T; N]>(s) }
   }
 }
 
 impl<T: ?Sized, P: Proxy<T> + ?Sized> ProxyWrapper<T, P> {
   /// Convert a reference to a `T` into a reference to a [`ProxyWrapper`].
   pub const fn wrap_ref(s: &T) -> &Self {
-    unsafe { crate::transmogrify::transmogrify_ref::<T, Self>(s) }
+    unsafe { crate::transmute::transmute_ref::<T, Self>(s) }
   }
 
   /// Convert a mutable reference to a `T` into a mutable reference to a [`ProxyWrapper`].
   pub const fn wrap_ref_mut(s: &mut T) -> &mut Self {
-    unsafe { crate::transmogrify::transmogrify_ref_mut::<T, Self>(s) }
+    unsafe { crate::transmute::transmute_ref_mut::<T, Self>(s) }
   }
 
   /// Convert a reference to a [`ProxyWrapper`] into a reference to a `T`.
@@ -222,6 +222,7 @@ impl<T: Hash, P: Proxy<T> + ?Sized> Hash for ProxyWrapper<T, P> {
   }
 }
 
+#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
 #[cfg(feature = "serde")]
 impl<T, P: Proxy<T>> serde::Serialize for ProxyWrapper<T, P>
 where T: serde::Serialize {
@@ -232,6 +233,7 @@ where T: serde::Serialize {
   }
 }
 
+#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
 #[cfg(feature = "serde")]
 impl<'de, T, P: Proxy<T>> serde::Deserialize<'de> for ProxyWrapper<T, P>
 where T: serde::Deserialize<'de> + Ord {
@@ -268,7 +270,7 @@ impl Proxy<f32> for TotalOrdFloat {
 /// comparison based on `&[T]`'s [`Ord`] implementation.
 ///
 /// Alternatively, a [`Proxy`] parameter may be supplied to
-/// override `T`'s [`Ord`] implementation
+/// override `T`'s [`Ord`] implementation.
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub struct OrdSliceLike<Slice, T, P = ()>
