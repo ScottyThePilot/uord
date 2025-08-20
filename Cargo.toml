@@ -2,12 +2,12 @@
 name = "uord"
 version = "0.1.0"
 authors = ["ScottyThePilot <scotty.codes@gmail.com>"]
-description = "An implementation of unordered pairs and unordered sets"
-#documentation = "https://docs.rs/singlefile"
-#repository = "https://github.com/ScottyThePilot/singlefile"
+description = "An implementation of unordered pairs (or more generally, unordered sets)"
+#documentation = "https://docs.rs/uord"
+#repository = "https://github.com/ScottyThePilot/uord"
 license = "MIT OR Apache-2.0"
 edition = "2024"
-rust-version = "1.87.0"
+rust-version = "1.87"
 
 [dependencies]
 serde = { version = "1.0", optional = true, default-features = false }
