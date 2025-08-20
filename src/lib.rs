@@ -450,6 +450,14 @@ impl<T: fmt::Debug, const N: usize> fmt::Debug for UOrd<T, N> {
   }
 }
 
+impl<T, const N: usize> Copy for UOrd<T, N> where T: Copy {}
+
+impl<T, const N: usize> Clone for UOrd<T, N> where T: Clone {
+  fn clone(&self) -> Self {
+    UOrd { values: self.values.clone() }
+  }
+}
+
 impl<T, const N: usize> PartialEq for UOrd<T, N> where T: Ord {
   fn eq(&self, other: &Self) -> bool {
     self.as_array() == other.as_array()
