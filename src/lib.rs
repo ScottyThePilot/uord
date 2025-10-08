@@ -17,8 +17,8 @@
 //!
 //! This is useful when, for example, you want to create a HashMap that associates data with pairs of things:
 //! ```rust
-//! #use uord::UOrd2;
-//! #use std::collections::HashMap;
+//! # use uord::UOrd2;
+//! # use std::collections::HashMap;
 //! let mut map: HashMap<UOrd2<u16>, String> = HashMap::new();
 //! map.insert(UOrd2::new([1, 6]), "1-6".to_owned());
 //! map.insert(UOrd2::new([3, 5]), "3-5".to_owned());
@@ -51,6 +51,18 @@ use core::hash::{Hash, Hasher};
 #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 #[cfg(feature = "alloc")]
 use alloc::vec::Vec;
+
+use crate::tuple::*;
+
+mod tuple {
+  #[allow(unreachable_pub)]
+  pub type Tuple<T, const N: usize> = <[T; N] as IntoTuple>::Tuple;
+
+  #[allow(unnameable_types)]
+  pub trait IntoTuple: Sized {
+    type Tuple: From<Self>;
+  }
+}
 
 
 
@@ -211,6 +223,11 @@ impl<T, const N: usize> UOrd<T, N> {
     unsafe { crate::transmute::transmute::<Self, [T; N]>(self) }
   }
 
+  /// Converts this [`UOrd`] into a tuple of length `N` similarly to [`into_array`][UOrd::into_array].
+  pub fn into_tuple(self) -> Tuple<T, N> where [T; N]: IntoTuple {
+    <Tuple<T, N>>::from(self.into_array())
+  }
+
   /// Creates an iterator over references to each element of this [`UOrd`].
   #[inline]
   pub fn iter(&self) -> UOrdIter<'_, T, N> {
@@ -277,6 +294,11 @@ impl<T, const N: usize, P> UOrdProxied<T, N, P> where P: Proxy<T> {
   /// Converts this [`UOrdProxied`] into its array of elements, which is sorted, and has each element stripped of their wrappers.
   pub const fn into_array_proxied(self) -> [T; N] {
     ProxyWrapper::peel_array(self.into_array())
+  }
+
+  /// Converts this [`UOrd`] into a tuple of length `N` similarly to [`into_array`][UOrd::into_array], and has each element stripped of their wrappers..
+  pub fn into_tuple_proxied(self) -> Tuple<T, N> where [T; N]: IntoTuple {
+    <Tuple<T, N>>::from(self.into_array_proxied())
   }
 
   /// Applies the function `f` to each element of this [`UOrdProxied`], returning a new [`UOrdProxied`].
@@ -498,6 +520,10 @@ impl<T, const N: usize> From<UOrd<T, N>> for [T; N] {
 
 macro_rules! impl_uord_tuple_conversion {
   ($T:ident, $N:literal, $Tuple:ty) => {
+    impl<$T> IntoTuple for [$T; $N] {
+      type Tuple = $Tuple;
+    }
+
     impl<$T> From<$Tuple> for UOrd<$T, $N> where T: Ord {
       #[inline]
       fn from(value: $Tuple) -> UOrd<$T, $N> {
