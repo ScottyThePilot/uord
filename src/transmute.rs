@@ -45,13 +45,13 @@ pub(crate) const unsafe fn transmute<T, U>(value: T) -> U {
   assert_align_eq!(T, U);
 
   #[repr(C)]
-  union transmuteCast<T, U> {
+  union TransmuteCast<T, U> {
     t: ManuallyDrop<T>,
     u: ManuallyDrop<U>
   }
 
   let value = ManuallyDrop::new(value);
   ManuallyDrop::into_inner(unsafe {
-    transmuteCast { t: value }.u
+    TransmuteCast { t: value }.u
   })
 }
