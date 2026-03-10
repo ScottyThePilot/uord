@@ -23,6 +23,8 @@
 //! map.insert(UOrd2::new([1, 6]), "1-6".to_owned());
 //! map.insert(UOrd2::new([3, 5]), "3-5".to_owned());
 //! map.insert(UOrd2::new([2, 4]), "2-4".to_owned());
+//!
+//! assert!(map.contains_key(&UOrd2::new([1, 6])));
 //! ```
 //!
 //! When creating a [`UOrd`], the ordering of the items on creation does not matter,
