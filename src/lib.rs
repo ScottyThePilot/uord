@@ -104,7 +104,7 @@ impl<T, const N: usize> UOrd<T, N> where T: Ord {
     self.test_any(|value| value.borrow() == x)
   }
 
-  /// Replaces any occurance of `from` with `to`, creating a new [`UOrd`].
+  /// Replaces any occurrence of `from` with `to`, creating a new [`UOrd`].
   pub fn replace<Q>(&self, from: &Q, to: &T) -> Self
   where T: Borrow<Q> + Clone, Q: Eq + ?Sized {
     self.map_each_ref(|value| {
@@ -270,7 +270,7 @@ impl<T, const N: usize, P> UOrdProxied<T, N, P> where P: Proxy<T> {
     self.test_any_proxied(|value| P::wrap(value.borrow()) == P::wrap(x))
   }
 
-  /// Replaces any occurance of `from` with `to`, creating a new [`UOrdProxied`].
+  /// Replaces any occurrence of `from` with `to`, creating a new [`UOrdProxied`].
   pub fn replace_proxied<Q>(&self, from: &Q, to: &T) -> Self
   where T: Borrow<Q> + Clone, Q: ?Sized, for<'q> P: Proxy<&'q Q> {
     self.map_each_ref_proxied(|value| {

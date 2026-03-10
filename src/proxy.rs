@@ -17,6 +17,9 @@ use core::marker::PhantomData;
 /// - Ideally not violate the relationship between [`Eq`] and [`Hash`].
 /// - Maintain the equivalency of comparison implementations between types implementing [`Borrow`][core::borrow::Borrow].
 ///
+/// Many methods on [`UOrd`][super::UOrd] have bounds that require `P: Proxy<&T>`,
+/// so you will likely want to implement `Proxy<&T> for P where P: Proxy<T>`.
+///
 /// One example of a type which benefits from this feature is `glam`'s integer vector types
 /// which implement neither ordering trait (for valid reasons), but prevents [`UOrd`][super::UOrd] from
 /// being usable with them.
@@ -267,6 +270,24 @@ impl Proxy<f32> for TotalOrdFloat {
   }
 }
 
+impl<T> Proxy<&T> for TotalOrdFloat
+where TotalOrdFloat: Proxy<T> {
+  #[inline]
+  fn cmp(lhs: &&T, rhs: &&T) -> Ordering {
+    TotalOrdFloat::cmp(&**lhs, &**rhs)
+  }
+
+  #[inline]
+  fn eq(lhs: &&T, rhs: &&T) -> bool {
+    TotalOrdFloat::eq(&**lhs, &**rhs)
+  }
+
+  #[inline]
+  fn ne(lhs: &&T, rhs: &&T) -> bool {
+    TotalOrdFloat::ne(&**lhs, &**rhs)
+  }
+}
+
 /// A [`Proxy`] for types that implement `AsRef<[T]>`, performing
 /// comparison based on `&[T]`'s [`Ord`] implementation.
 ///
@@ -301,5 +322,23 @@ where Slice: AsRef<[T]>, P: Proxy<T> + ?Sized {
 
   fn ne(lhs: &Slice, rhs: &Slice) -> bool {
     Self::get_proxy_wrapper_slice(lhs) != Self::get_proxy_wrapper_slice(rhs)
+  }
+}
+
+impl<Slice, T, P> Proxy<&Slice> for OrdSliceLike<Slice, T, P>
+where Slice: AsRef<[T]>, P: Proxy<T> + ?Sized {
+  #[inline]
+  fn cmp(lhs: &&Slice, rhs: &&Slice) -> Ordering {
+    OrdSliceLike::<Slice, T, P>::cmp(&**lhs, &**rhs)
+  }
+
+  #[inline]
+  fn eq(lhs: &&Slice, rhs: &&Slice) -> bool {
+    OrdSliceLike::<Slice, T, P>::eq(&**lhs, &**rhs)
+  }
+
+  #[inline]
+  fn ne(lhs: &&Slice, rhs: &&Slice) -> bool {
+    OrdSliceLike::<Slice, T, P>::ne(&**lhs, &**rhs)
   }
 }
