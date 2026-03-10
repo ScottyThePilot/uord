@@ -188,6 +188,7 @@ impl<T, P: Proxy<T> + ?Sized> PartialEq for ProxyWrapper<T, P> {
     P::eq(&self.inner, &other.inner)
   }
 
+  #[allow(clippy::partialeq_ne_impl)]
   #[inline]
   fn ne(&self, other: &Self) -> bool {
     P::ne(&self.inner, &other.inner)

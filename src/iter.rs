@@ -60,7 +60,7 @@ pub struct UOrdIter<'a, T, const N: usize> {
 
 impl<'a, T, const N: usize> UOrdIter<'a, T, N> {
   pub(crate) fn new(inner: &'a [T; N]) -> Self {
-    UOrdIter { inner: inner.into_iter() }
+    UOrdIter { inner: inner.iter() }
   }
 }
 
@@ -116,7 +116,7 @@ pub struct UOrdProxiedIter<'a, T, const N: usize, P: Proxy<T>> {
 
 impl<'a, T, const N: usize, P: Proxy<T>> UOrdProxiedIter<'a, T, N, P> {
   pub(crate) fn new(inner: &'a [ProxyWrapper<T, P>; N]) -> Self {
-    UOrdProxiedIter { inner: inner.into_iter() }
+    UOrdProxiedIter { inner: inner.iter() }
   }
 }
 

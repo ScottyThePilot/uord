@@ -79,6 +79,10 @@ pub type UOrd6<T> = UOrd<T, 6>;
 
 /// An unordered tuple of items of type `T` and length `N`.
 ///
+/// [`UOrd`] is implemented such that the order of elements on creation does not matter,
+/// and the [`UOrd`]s created from different ordered lists will behave similarly in
+/// [`PartialEq`], [`Ord`], or [`Hash`].
+///
 /// [`UOrd`]'s implementation maintains a sorted list of values that is not allowed
 /// to be mutated. Using interior mutability to mutate elements of a [`UOrd`] is a logic error
 /// and is not supported. Doing so is very likely to cause strange behavior.
@@ -95,14 +99,14 @@ impl<T, const N: usize> UOrd<T, N> where T: Ord {
   }
 
   /// Tests whether this [`UOrd`] contains the given value.
-  pub fn contains<Q: ?Sized>(&self, x: &Q) -> bool
-  where T: Borrow<Q>, Q: Eq {
+  pub fn contains<Q>(&self, x: &Q) -> bool
+  where T: Borrow<Q>, Q: Eq + ?Sized {
     self.test_any(|value| value.borrow() == x)
   }
 
   /// Replaces any occurance of `from` with `to`, creating a new [`UOrd`].
-  pub fn replace<Q: ?Sized>(&self, from: &Q, to: &T) -> Self
-  where T: Borrow<Q> + Clone, Q: Eq {
+  pub fn replace<Q>(&self, from: &Q, to: &T) -> Self
+  where T: Borrow<Q> + Clone, Q: Eq + ?Sized {
     self.map_each_ref(|value| {
       if value.borrow() == from {
         to.clone()
@@ -188,6 +192,7 @@ impl<T, const N: usize> UOrd<T, N> {
   ///
   /// # Panics
   /// This function will panic if `N == 0`.
+  #[doc(alias = "first")]
   pub const fn min(&self) -> &T {
     self.values.first().expect("uord length must not be 0")
   }
@@ -196,6 +201,7 @@ impl<T, const N: usize> UOrd<T, N> {
   ///
   /// # Panics
   /// This function will panic if `N == 0`.
+  #[doc(alias = "last")]
   pub const fn max(&self) -> &T {
     self.values.last().expect("uord length must not be 0")
   }
@@ -259,14 +265,14 @@ impl<T, const N: usize, P> UOrdProxied<T, N, P> where P: Proxy<T> {
   }
 
   /// Tests whether this [`UOrdProxied`] contains the given value.
-  pub fn contains_proxied<Q: ?Sized>(&self, x: &Q) -> bool
-  where T: Borrow<Q>, for<'q> P: Proxy<&'q Q> {
+  pub fn contains_proxied<Q>(&self, x: &Q) -> bool
+  where T: Borrow<Q>, Q: ?Sized, for<'q> P: Proxy<&'q Q> {
     self.test_any_proxied(|value| P::wrap(value.borrow()) == P::wrap(x))
   }
 
   /// Replaces any occurance of `from` with `to`, creating a new [`UOrdProxied`].
-  pub fn replace_proxied<Q: ?Sized>(&self, from: &Q, to: T) -> Self
-  where T: Borrow<Q> + Clone, for<'q> P: Proxy<&'q Q> {
+  pub fn replace_proxied<Q>(&self, from: &Q, to: &T) -> Self
+  where T: Borrow<Q> + Clone, Q: ?Sized, for<'q> P: Proxy<&'q Q> {
     self.map_each_ref_proxied(|value| {
       if P::wrap(value.borrow()) == P::wrap(from) {
         to.clone()
@@ -274,6 +280,22 @@ impl<T, const N: usize, P> UOrdProxied<T, N, P> where P: Proxy<T> {
         value.clone()
       }
     })
+  }
+
+  /// Gets the first (smallest) element in the internal list, stripped of its wrappers.
+  ///
+  /// # Panics
+  /// This function will panic if `N == 0`.
+  pub const fn min_proxied(&self) -> &T {
+    ProxyWrapper::peel_ref(self.min())
+  }
+
+  /// Gets the last (greatest) element in the internal list, stripped of its wrappers.
+  ///
+  /// # Panics
+  /// This function will panic if `N == 0`.
+  pub const fn max_proxied(&self) -> &T {
+    ProxyWrapper::peel_ref(self.max())
   }
 
   /// Borrows each element in this [`UOrdProxied`], returning a [`UOrd`] of those references, stripped of their wrappers.
@@ -397,8 +419,8 @@ impl<T> UOrd2<T> where T: Ord {
   /// Note that this function does not care about the distinctness of the pair, and will
   /// still return the other value, even if it was equal to the input value.
   /// If you need this behavior, see [`UOrd::other_distinct`].
-  pub fn other<Q: ?Sized>(&self, x: &Q) -> Option<&T>
-  where T: Borrow<Q>, Q: Eq {
+  pub fn other<Q>(&self, x: &Q) -> Option<&T>
+  where T: Borrow<Q>, Q: Eq + ?Sized {
     let [min, max] = self.as_array();
     Option::or(
       if max.borrow() == x { Some(min) } else { None },
@@ -411,8 +433,8 @@ impl<T> UOrd2<T> where T: Ord {
   ///
   /// Additionally, this function will return `None` if the two items in this pair were equal,
   /// guaranteeing that the output value is never equal to the input value in the case of an indistinct pair.
-  pub fn other_distinct<Q: ?Sized>(&self, x: &Q) -> Option<&T>
-  where T: Borrow<Q>, Q: Eq {
+  pub fn other_distinct<Q>(&self, x: &Q) -> Option<&T>
+  where T: Borrow<Q>, Q: Eq + ?Sized {
     let [min, max] = self.as_array();
     Option::xor(
       if max.borrow() == x { Some(min) } else { None },
@@ -428,8 +450,8 @@ impl<T, P> UOrdProxied2<T, P> where P: Proxy<T> {
   /// Note that this function does not care about the distinctness of the pair, and will
   /// still return the other value, even if it was equal to the input value.
   /// If you need this behavior, see [`UOrdProxied::other_distinct_proxied`].
-  pub fn other_proxied<Q: ?Sized>(&self, x: &Q) -> Option<&T>
-  where T: Borrow<Q>, for<'q> P: Proxy<&'q Q> {
+  pub fn other_proxied<Q>(&self, x: &Q) -> Option<&T>
+  where T: Borrow<Q>, Q: ?Sized, for<'q> P: Proxy<&'q Q> {
     let [min, max] = self.as_array_proxied();
     Option::or(
       if P::wrap(max.borrow()) == P::wrap(x) { Some(min) } else { None },
@@ -442,8 +464,8 @@ impl<T, P> UOrdProxied2<T, P> where P: Proxy<T> {
   ///
   /// Additionally, this function will return `None` if the two items in this pair were equal,
   /// guaranteeing that the output value is never equal to the input value in the case of an indistinct pair.
-  pub fn other_distinct_proxied<Q: ?Sized>(&self, x: &Q) -> Option<&T>
-  where T: Borrow<Q>, for<'q> P: Proxy<&'q Q> {
+  pub fn other_distinct_proxied<Q>(&self, x: &Q) -> Option<&T>
+  where T: Borrow<Q>, Q: ?Sized, for<'q> P: Proxy<&'q Q> {
     let [min, max] = self.as_array_proxied();
     Option::xor(
       if P::wrap(max.borrow()) == P::wrap(x) { Some(min) } else { None },
