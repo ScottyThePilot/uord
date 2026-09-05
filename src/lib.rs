@@ -54,9 +54,9 @@ use core::hash::{Hash, Hasher};
 #[cfg(feature = "alloc")]
 use alloc::vec::Vec;
 
-use crate::tuple::*;
+use crate::private::*;
 
-mod tuple {
+mod private {
   #[allow(unreachable_pub)]
   pub type Tuple<T, const N: usize> = <[T; N] as IntoTuple>::Tuple;
 
@@ -190,6 +190,11 @@ impl<T, const N: usize> UOrd<T, N> where T: Ord {
 }
 
 impl<T, const N: usize> UOrd<T, N> {
+  /// Gets an element at the given position.
+  pub fn get(&self, index: usize) -> Option<&T> {
+    self.values.get(index)
+  }
+
   /// Gets the first (smallest) element in the internal list.
   ///
   /// # Panics
@@ -284,7 +289,12 @@ impl<T, const N: usize, P> UOrdProxied<T, N, P> where P: Proxy<T> {
     })
   }
 
-  /// Gets the first (smallest) element in the internal list, stripped of its wrappers.
+  /// Gets an element at the given position, stripped of its wrapper.
+  pub fn get_proxied(&self, index: usize) -> Option<&T> {
+    self.get(index).map(ProxyWrapper::peel_ref)
+  }
+
+  /// Gets the first (smallest) element in the internal list, stripped of its wrapper.
   ///
   /// # Panics
   /// This function will panic if `N == 0`.
@@ -292,7 +302,7 @@ impl<T, const N: usize, P> UOrdProxied<T, N, P> where P: Proxy<T> {
     ProxyWrapper::peel_ref(self.min())
   }
 
-  /// Gets the last (greatest) element in the internal list, stripped of its wrappers.
+  /// Gets the last (greatest) element in the internal list, stripped of its wrapper.
   ///
   /// # Panics
   /// This function will panic if `N == 0`.

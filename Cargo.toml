@@ -5,6 +5,7 @@ authors = ["ScottyThePilot <scotty.codes@gmail.com>"]
 description = "An implementation of unordered pairs (or more generally, unordered sets)"
 documentation = "https://docs.rs/uord"
 repository = "https://github.com/ScottyThePilot/uord"
+keywords = ["unordered", "pair", "set", "tuple"]
 license = "MIT OR Apache-2.0"
 edition = "2024"
 rust-version = "1.87"
