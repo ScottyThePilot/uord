@@ -20,6 +20,8 @@ assert!(map.contains_key(&UOrd2::new([1, 6])));
 When creating a [`UOrd`], the ordering of the items on creation does not matter,
 and [`UOrd`]s created with different initial element orders will be equal to one another.
 
+[`UOrd`]: https://docs.rs/uord/latest/uord/struct.UOrd.html
+
 [crates-img]: https://img.shields.io/crates/v/uord.svg
 [crates-url]: https://crates.io/crates/uord
 

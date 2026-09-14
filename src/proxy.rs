@@ -21,7 +21,7 @@ use core::marker::PhantomData;
 /// so you will likely want to implement `Proxy<&T> for P where P: Proxy<T>`.
 ///
 /// One example of a type which benefits from this feature is `glam`'s integer vector types
-/// which implement neither ordering trait (for valid reasons), but prevents [`UOrd`][super::UOrd] from
+/// which implement neither ordering trait (for valid reasons), which prevents [`UOrd`][super::UOrd] from
 /// being usable with them.
 ///
 /// Proxies are never instantiated, so they may be unit types or empty enums.
