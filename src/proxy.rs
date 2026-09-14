@@ -288,6 +288,63 @@ where TotalOrdFloat: Proxy<T> {
   }
 }
 
+/// A [`Proxy`] for types that implement `AsRef<[T; N]>`, performing
+/// comparison based on `&[T; N]`'s [`Ord`] implementation.
+///
+/// Alternatively, a [`Proxy`] parameter may be supplied to
+/// override `T`'s [`Ord`] implementation.
+#[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
+pub struct OrdArrayLike<Array, T, const N: usize, P = ()>
+where Array: AsRef<[T; N]>, P: Proxy<T> + ?Sized {
+  array: PhantomData<Array>,
+  value: PhantomData<T>,
+  proxy: PhantomData<P>
+}
+
+impl<Array, T, const N: usize, P> OrdArrayLike<Array, T, N, P>
+where Array: AsRef<[T; N]>, P: Proxy<T> + ?Sized {
+  #[inline]
+  fn get_proxy_wrapper_array(array: &Array) -> &[ProxyWrapper<T, P>; N] {
+    ProxyWrapper::wrap_array_ref(array.as_ref())
+  }
+}
+
+impl<Array, T, const N: usize, P> Proxy<Array> for OrdArrayLike<Array, T, N, P>
+where Array: AsRef<[T; N]>, P: Proxy<T> + ?Sized {
+  fn cmp(lhs: &Array, rhs: &Array) -> Ordering {
+    Ord::cmp(Self::get_proxy_wrapper_array(lhs), Self::get_proxy_wrapper_array(rhs))
+  }
+
+  fn eq(lhs: &Array, rhs: &Array) -> bool {
+    Self::get_proxy_wrapper_array(lhs) == Self::get_proxy_wrapper_array(rhs)
+  }
+
+  fn ne(lhs: &Array, rhs: &Array) -> bool {
+    Self::get_proxy_wrapper_array(lhs) != Self::get_proxy_wrapper_array(rhs)
+  }
+}
+
+impl<Array, T, const N: usize, P> Proxy<&Array> for OrdArrayLike<Array, T, N, P>
+where Array: AsRef<[T; N]>, P: Proxy<T> + ?Sized {
+  #[inline]
+  fn cmp(lhs: &&Array, rhs: &&Array) -> Ordering {
+    OrdArrayLike::<Array, T, N, P>::cmp(&**lhs, &**rhs)
+  }
+
+  #[inline]
+  fn eq(lhs: &&Array, rhs: &&Array) -> bool {
+    OrdArrayLike::<Array, T, N, P>::eq(&**lhs, &**rhs)
+  }
+
+  #[inline]
+  fn ne(lhs: &&Array, rhs: &&Array) -> bool {
+    OrdArrayLike::<Array, T, N, P>::ne(&**lhs, &**rhs)
+  }
+}
+
+
+
 /// A [`Proxy`] for types that implement `AsRef<[T]>`, performing
 /// comparison based on `&[T]`'s [`Ord`] implementation.
 ///
