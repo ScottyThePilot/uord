@@ -69,14 +69,54 @@ mod private {
 
 
 /// An unordered tuple of items of type `T` and length 2.
+///
+/// # Examples
+///
+/// ```rust
+/// # use uord::UOrd2;
+/// let set = UOrd2::<u32>::new([1, 0]);
+/// assert!(set.contains(&1));
+/// ```
 pub type UOrd2<T> = UOrd<T, 2>;
 /// An unordered tuple of items of type `T` and length 3.
+///
+/// # Examples
+///
+/// ```rust
+/// # use uord::UOrd3;
+/// let set = UOrd3::<u32>::new([2, 1, 0]);
+/// assert!(set.contains(&2));
+/// ```
 pub type UOrd3<T> = UOrd<T, 3>;
 /// An unordered tuple of items of type `T` and length 4.
+///
+/// # Examples
+///
+/// ```rust
+/// # use uord::UOrd4;
+/// let set = UOrd4::<u32>::new([3, 2, 1, 0]);
+/// assert!(set.contains(&3));
+/// ```
 pub type UOrd4<T> = UOrd<T, 4>;
 /// An unordered tuple of items of type `T` and length 5.
+///
+/// # Examples
+///
+/// ```rust
+/// # use uord::UOrd5;
+/// let set = UOrd5::<u32>::new([4, 3, 2, 1, 0]);
+/// assert!(set.contains(&4));
+/// ```
 pub type UOrd5<T> = UOrd<T, 5>;
 /// An unordered tuple of items of type `T` and length 6.
+///
+/// # Examples
+///
+/// ```rust
+/// # use uord::UOrd6;
+/// let set = UOrd6::<u32>::new([5, 4, 3, 2, 1, 0]);
+/// assert!(set.contains(&5));
+/// ```
 pub type UOrd6<T> = UOrd<T, 6>;
 
 /// An unordered tuple of items of type `T` and length `N`.
@@ -249,14 +289,59 @@ impl<T, const N: usize> UOrd<T, N> {
 }
 
 /// An unordered tuple of items of type `T` and length 2, additionally utilizing a [`Proxy`].
+///
+/// # Examples
+///
+/// ```rust
+/// # use uord::UOrdProxied2;
+/// # use uord::proxy::TotalOrdFloat;
+/// let set = UOrdProxied2::<f32, TotalOrdFloat>::new_proxied([1.0, 0.0]);
+/// assert!(set.contains_proxied(&1.0));
+/// ```
 pub type UOrdProxied2<T, P> = UOrd2<ProxyWrapper<T, P>>;
 /// An unordered tuple of items of type `T` and length 3, additionally utilizing a [`Proxy`].
+///
+/// # Examples
+///
+/// ```rust
+/// # use uord::UOrdProxied3;
+/// # use uord::proxy::TotalOrdFloat;
+/// let set = UOrdProxied3::<f32, TotalOrdFloat>::new_proxied([2.0, 1.0, 0.0]);
+/// assert!(set.contains_proxied(&2.0));
+/// ```
 pub type UOrdProxied3<T, P> = UOrd3<ProxyWrapper<T, P>>;
 /// An unordered tuple of items of type `T` and length 4, additionally utilizing a [`Proxy`].
+///
+/// # Examples
+///
+/// ```rust
+/// # use uord::UOrdProxied4;
+/// # use uord::proxy::TotalOrdFloat;
+/// let set = UOrdProxied4::<f32, TotalOrdFloat>::new_proxied([3.0, 2.0, 1.0, 0.0]);
+/// assert!(set.contains_proxied(&3.0));
+/// ```
 pub type UOrdProxied4<T, P> = UOrd4<ProxyWrapper<T, P>>;
 /// An unordered tuple of items of type `T` and length 5, additionally utilizing a [`Proxy`].
+///
+/// # Examples
+///
+/// ```rust
+/// # use uord::UOrdProxied5;
+/// # use uord::proxy::TotalOrdFloat;
+/// let set = UOrdProxied5::<f32, TotalOrdFloat>::new_proxied([4.0, 3.0, 2.0, 1.0, 0.0]);
+/// assert!(set.contains_proxied(&4.0));
+/// ```
 pub type UOrdProxied5<T, P> = UOrd5<ProxyWrapper<T, P>>;
 /// An unordered tuple of items of type `T` and length 6, additionally utilizing a [`Proxy`].
+///
+/// # Examples
+///
+/// ```rust
+/// # use uord::UOrdProxied6;
+/// # use uord::proxy::TotalOrdFloat;
+/// let set = UOrdProxied6::<f32, TotalOrdFloat>::new_proxied([5.0, 4.0, 3.0, 2.0, 1.0, 0.0]);
+/// assert!(set.contains_proxied(&5.0));
+/// ```
 pub type UOrdProxied6<T, P> = UOrd6<ProxyWrapper<T, P>>;
 
 /// An unordered tuple of items of type `T` and length `N`, additionally utilizing a [`Proxy`].
