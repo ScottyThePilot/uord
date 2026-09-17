@@ -19,7 +19,7 @@
 //! ```rust
 //! # use uord::UOrd2;
 //! # use std::collections::HashMap;
-//! let mut map: HashMap<UOrd2<u16>, String> = HashMap::new();
+//! let mut map: HashMap<UOrd2<u32>, String> = HashMap::new();
 //! map.insert(UOrd2::new([1, 6]), "1-6".to_owned());
 //! map.insert(UOrd2::new([3, 5]), "3-5".to_owned());
 //! map.insert(UOrd2::new([2, 4]), "2-4".to_owned());
@@ -128,6 +128,19 @@ pub type UOrd6<T> = UOrd<T, 6>;
 /// [`UOrd`]'s implementation maintains a sorted list of values that is not allowed
 /// to be mutated. Using interior mutability to mutate elements of a [`UOrd`] is a logic error
 /// and is not supported. Doing so is very likely to cause strange behavior.
+///
+/// # Examples
+///
+/// ```rust
+/// # use uord::UOrd2;
+/// # use std::collections::HashMap;
+/// let mut map: HashMap<UOrd2<u32>, String> = HashMap::new();
+/// map.insert(UOrd2::new([1, 6]), "1-6".to_owned());
+/// map.insert(UOrd2::new([3, 5]), "3-5".to_owned());
+/// map.insert(UOrd2::new([2, 4]), "2-4".to_owned());
+///
+/// assert!(map.contains_key(&UOrd2::new([1, 6])));
+/// ```
 #[repr(transparent)]
 pub struct UOrd<T, const N: usize> {
   values: [T; N]
